@@ -1,0 +1,8 @@
+install/
+log/
+build/
+.vscode/
+.lgd-nfy0
+platformIO_projects/esp32_communication/.pio/
+platformIO_projects/esp32_communication/.vscode/
+secrets.txt
