@@ -6,11 +6,10 @@
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 #include <std_msgs/msg/int8_multi_array.h>
-#include "DRV8871.h"
 
 char* ssid = "Alexandre_iphone";
 char* password = "hehexdlmao";
-char* agent_ip = "172.20.10.7";
+char* agent_ip = "172.20.10.8";
 int agent_port = 8888;
 
 rcl_subscription_t subscriber;
@@ -20,15 +19,23 @@ rclc_support_t support;
 rcl_allocator_t allocator;
 rcl_node_t node;
 
-
-
 #define LED_PIN 13
-#define MOTOR_IN0  14
-#define MOTOR_IN1  12
-#define PWM_CHANNEL0  0
-#define PWM_CHANNEL1  1
 
-DRV8871 motor(MOTOR_IN0, MOTOR_IN1,  PWM_CHANNEL0, PWM_CHANNEL1);
+// -------- Motor 1 (Left) pins --------
+#define MOTOR1_IN0     14
+#define MOTOR1_IN1     12
+#define PWM_CHANNEL0   0
+#define PWM_CHANNEL1   1
+
+// -------- Motor 2 (Right) pins --------
+#define MOTOR2_IN0     27
+#define MOTOR2_IN1     26
+#define PWM_CHANNEL2   2
+#define PWM_CHANNEL3   3
+
+// Motor objects
+DRV8871 motor_left(MOTOR1_IN0, MOTOR1_IN1, PWM_CHANNEL0, PWM_CHANNEL1);
+DRV8871 motor_right(MOTOR2_IN0, MOTOR2_IN1, PWM_CHANNEL2, PWM_CHANNEL3);
 
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){ \
   Serial.println(rcl_get_error_string().str); \
@@ -46,38 +53,56 @@ void error_loop() {
 void subscription_callback(const void *msgin) {
   const std_msgs__msg__Int8MultiArray *msg = (const std_msgs__msg__Int8MultiArray *)msgin;
 
-  if (msg->data.size < 2) {
+  if (msg->data.size < 4) {
     Serial.println("Invalid message size");
     return;
   }
 
-  int8_t direction = msg->data.data[0];
-  int8_t speed = msg->data.data[1];
+  // Unpack message
+  int8_t left_dir   = msg->data.data[0];
+  int8_t left_speed = msg->data.data[1];
+  int8_t right_dir   = msg->data.data[2];
+  int8_t right_speed = msg->data.data[3];
 
-  Serial.print("Direction: ");
-  Serial.print(direction);
-  Serial.print(" Speed: ");
-  Serial.println(speed);
-  if (direction ==-1) direction = 0;
-  if (direction == 1) {
+  Serial.print("Left: dir=");
+  Serial.print(left_dir);
+  Serial.print(" speed=");
+  Serial.print(left_speed);
+  Serial.print(" | Right: dir=");
+  Serial.print(right_dir);
+  Serial.print(" speed=");
+  Serial.println(right_speed);
+
+  // Convert -1/1 to driver direction format (0=backward, 1=forward, etc.)
+  if (left_dir == -1) left_dir = 0;
+  if (right_dir == -1) right_dir = 0;
+
+  // Drive motors
+  motor_left.setMotor(left_dir, left_speed);
+  motor_right.setMotor(right_dir, right_speed);
+
+  // LED indicator: ON if any motor moves forward
+  if (left_speed > 0 || right_speed > 0) {
     digitalWrite(LED_PIN, HIGH);
-  } else if (direction == 0) {
+  } else {
     digitalWrite(LED_PIN, LOW);
   }
-  motor.setMotor(direction, speed);
 }
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
   Serial.begin(115200);
-  motor.init();
+
+  motor_left.init();
+  motor_right.init();
+
   WiFi.begin(ssid, password);
   Serial.print("Connecting to Wi-Fi...");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\nConnected! IP: " + WiFi.localIP());
+  Serial.println("\nConnected! IP: " + WiFi.localIP().toString());
 
   set_microros_wifi_transports(ssid, password, agent_ip, agent_port);
 
@@ -86,8 +111,8 @@ void setup() {
   RCCHECK(rclc_node_init_default(&node, "micro_ros_wifi_node", "", &support));
 
   // Allocate memory for message data
-  msg.data.capacity = 2;
-  msg.data.size = 2;
+  msg.data.capacity = 4;
+  msg.data.size = 4;
   msg.data.data = (int8_t*)malloc(msg.data.capacity * sizeof(int8_t));
   if (msg.data.data == NULL) {
     Serial.println("Memory allocation failed");

@@ -22,7 +22,7 @@ WT901CTTL     MEGA 2560
 
 static volatile char s_cDataUpdate = 0, s_cCmd = 0xff; 
 
-static void CmdProcess(void);
+// static void CmdProcess(void);
 static void AutoScanSensor(void);
 static void SensorUartSend(uint8_t *p_data, uint32_t uiSize);
 static void SensorDataUpdata(uint32_t uiReg, uint32_t uiRegNum);
@@ -31,7 +31,7 @@ const uint32_t c_uiBaud[8] = {0,4800, 9600, 19200, 38400, 57600, 115200, 230400}
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  Serial.begin(9600);
 	WitInit(WIT_PROTOCOL_NORMAL, 0x50);
 	WitSerialWriteRegister(SensorUartSend);
 	WitRegisterCallBack(SensorDataUpdata);
@@ -50,7 +50,7 @@ void loop() {
     {
       CopeCmdData(Serial.read());
     }
-		CmdProcess();
+		// CmdProcess();
 		if(s_cDataUpdate)
 		{
 			for(i = 0; i < 3; i++)
@@ -94,16 +94,17 @@ void loop() {
 			}
 			if(s_cDataUpdate & MAG_UPDATE)
 			{
-				Serial.print("mag:");
-				Serial.print(sReg[HX]);
-				Serial.print(" ");
-				Serial.print(sReg[HY]);
-				Serial.print(" ");
-				Serial.print(sReg[HZ]);
-				Serial.print("\r\n");
+				// Serial.print("mag:");
+				// Serial.print(sReg[HX]);
+				// Serial.print(" ");
+				// Serial.print(sReg[HY]);
+				// Serial.print(" ");
+				// Serial.print(sReg[HZ]);
+				// Serial.print("\r\n");
 				s_cDataUpdate &= ~MAG_UPDATE;
 			}
       s_cDataUpdate = 0;
+      Serial.print("----------------------------------");
 		}
 }
 
@@ -132,68 +133,69 @@ void CopeCmdData(unsigned char ucData)
 		}
 	}
 }
-static void ShowHelp(void)
-{
-	Serial.print("\r\n************************	 WIT_SDK_DEMO	************************");
-	Serial.print("\r\n************************          HELP           ************************\r\n");
-	Serial.print("UART SEND:a\\r\\n   Acceleration calibration.\r\n");
-	Serial.print("UART SEND:m\\r\\n   Magnetic field calibration,After calibration send:   e\\r\\n   to indicate the end\r\n");
-	Serial.print("UART SEND:U\\r\\n   Bandwidth increase.\r\n");
-	Serial.print("UART SEND:u\\r\\n   Bandwidth reduction.\r\n");
-	Serial.print("UART SEND:B\\r\\n   Baud rate increased to 115200.\r\n");
-	Serial.print("UART SEND:b\\r\\n   Baud rate reduction to 9600.\r\n");
-	Serial.print("UART SEND:R\\r\\n   The return rate increases to 10Hz.\r\n");
-  Serial.print("UART SEND:r\\r\\n   The return rate reduction to 1Hz.\r\n");
-  Serial.print("UART SEND:C\\r\\n   Basic return content: acceleration, angular velocity, angle, magnetic field.\r\n");
-  Serial.print("UART SEND:c\\r\\n   Return content: acceleration.\r\n");
-  Serial.print("UART SEND:h\\r\\n   help.\r\n");
-	Serial.print("******************************************************************************\r\n");
-}
+// static void ShowHelp(void)
+// {
+// 	Serial.print("\r\n************************	 WIT_SDK_DEMO	************************");
+// 	Serial.print("\r\n************************          HELP           ************************\r\n");
+// 	Serial.print("UART SEND:a\\r\\n   Acceleration calibration.\r\n");
+// 	Serial.print("UART SEND:m\\r\\n   Magnetic field calibration,After calibration send:   e\\r\\n   to indicate the end\r\n");
+// 	Serial.print("UART SEND:U\\r\\n   Bandwidth increase.\r\n");
+// 	Serial.print("UART SEND:u\\r\\n   Bandwidth reduction.\r\n");
+// 	Serial.print("UART SEND:B\\r\\n   Baud rate increased to 115200.\r\n");
+// 	Serial.print("UART SEND:b\\r\\n   Baud rate reduction to 9600.\r\n");
+// 	Serial.print("UART SEND:R\\r\\n   The return rate increases to 10Hz.\r\n");
+//   Serial.print("UART SEND:r\\r\\n   The return rate reduction to 1Hz.\r\n");
+//   Serial.print("UART SEND:C\\r\\n   Basic return content: acceleration, angular velocity, angle, magnetic field.\r\n");
+//   Serial.print("UART SEND:c\\r\\n   Return content: acceleration.\r\n");
+//   Serial.print("UART SEND:h\\r\\n   help.\r\n");
+// 	Serial.print("******************************************************************************\r\n");
+// }
 
-static void CmdProcess(void)
-{
-	switch(s_cCmd)
-	{
-		case 'a':	if(WitStartAccCali() != WIT_HAL_OK) Serial.print("\r\nSet AccCali Error\r\n");
-			break;
-		case 'm':	if(WitStartMagCali() != WIT_HAL_OK) Serial.print("\r\nSet MagCali Error\r\n");
-			break;
-		case 'e':	if(WitStopMagCali() != WIT_HAL_OK) Serial.print("\r\nSet MagCali Error\r\n");
-			break;
-		case 'u':	if(WitSetBandwidth(BANDWIDTH_5HZ) != WIT_HAL_OK) Serial.print("\r\nSet Bandwidth Error\r\n");
-			break;
-		case 'U':	if(WitSetBandwidth(BANDWIDTH_256HZ) != WIT_HAL_OK) Serial.print("\r\nSet Bandwidth Error\r\n");
-			break;
-		case 'B':	if(WitSetUartBaud(WIT_BAUD_115200) != WIT_HAL_OK) Serial.print("\r\nSet Baud Error\r\n");
-              else 
-              {
-                Serial1.begin(c_uiBaud[WIT_BAUD_115200]);
-                Serial.print(" 115200 Baud rate modified successfully\r\n");
-              }
-			break;
-		case 'b':	if(WitSetUartBaud(WIT_BAUD_9600) != WIT_HAL_OK) Serial.print("\r\nSet Baud Error\r\n");
-              else 
-              {
-                Serial1.begin(c_uiBaud[WIT_BAUD_9600]); 
-                Serial.print(" 9600 Baud rate modified successfully\r\n");
-              }
-			break;
-		case 'r': if(WitSetOutputRate(RRATE_1HZ) != WIT_HAL_OK)  Serial.print("\r\nSet Baud Error\r\n");
-			        else Serial.print("\r\nSet Baud Success\r\n");
-			break;
-		case 'R':	if(WitSetOutputRate(RRATE_10HZ) != WIT_HAL_OK) Serial.print("\r\nSet Baud Error\r\n");
-              else Serial.print("\r\nSet Baud Success\r\n");
-			break;
-    case 'C': if(WitSetContent(RSW_ACC|RSW_GYRO|RSW_ANGLE|RSW_MAG) != WIT_HAL_OK) Serial.print("\r\nSet RSW Error\r\n");
-      break;
-    case 'c': if(WitSetContent(RSW_ACC) != WIT_HAL_OK) Serial.print("\r\nSet RSW Error\r\n");
-      break;
-		case 'h':	ShowHelp();
-			break;
-		default :break;
-	}
-	s_cCmd = 0xff;
-}
+// static void CmdProcess(void)
+// {
+// 	switch(s_cCmd)
+// 	{
+// 		case 'a':	if(WitStartAccCali() != WIT_HAL_OK) Serial.print("\r\nSet AccCali Error\r\n");
+// 			break;
+// 		case 'm':	if(WitStartMagCali() != WIT_HAL_OK) Serial.print("\r\nSet MagCali Error\r\n");
+// 			break;
+// 		case 'e':	if(WitStopMagCali() != WIT_HAL_OK) Serial.print("\r\nSet MagCali Error\r\n");
+// 			break;
+// 		case 'u':	if(WitSetBandwidth(BANDWIDTH_5HZ) != WIT_HAL_OK) Serial.print("\r\nSet Bandwidth Error\r\n");
+// 			break;
+// 		case 'U':	if(WitSetBandwidth(BANDWIDTH_256HZ) != WIT_HAL_OK) Serial.print("\r\nSet Bandwidth Error\r\n");
+// 			break;
+// 		case 'B':	if(WitSetUartBaud(WIT_BAUD_115200) != WIT_HAL_OK) Serial.print("\r\nSet Baud Error\r\n");
+//               else 
+//               {
+//                 Serial1.begin(c_uiBaud[WIT_BAUD_115200]);
+//                 Serial.print(" 115200 Baud rate modified successfully\r\n");
+//               }
+// 			break;
+// 		case 'b':	if(WitSetUartBaud(WIT_BAUD_9600) != WIT_HAL_OK) Serial.print("\r\nSet Baud Error\r\n");
+//               else 
+//               {
+//                 Serial1.begin(c_uiBaud[WIT_BAUD_9600]); 
+//                 Serial.print(" 9600 Baud rate modified successfully\r\n");
+//               }
+// 			break;
+// 		case 'r': if(WitSetOutputRate(RRATE_1HZ) != WIT_HAL_OK)  Serial.print("\r\nSet Baud Error\r\n");
+// 			        else Serial.print("\r\nSet Baud Success\r\n");
+// 			break;
+// 		case 'R':	if(WitSetOutputRate(RRATE_10HZ) != WIT_HAL_OK) Serial.print("\r\nSet Baud Error\r\n");
+//               else Serial.print("\r\nSet Baud Success\r\n");
+// 			break;
+//     case 'C': if(WitSetContent(RSW_ACC|RSW_GYRO|RSW_ANGLE|RSW_MAG) != WIT_HAL_OK) Serial.print("\r\nSet RSW Error\r\n");
+//       break;
+//     case 'c': if(WitSetContent(RSW_ACC) != WIT_HAL_OK) Serial.print("\r\nSet RSW Error\r\n");
+//       break;
+// 		case 'h':	ShowHelp();
+// 			break;
+// 		default :break;
+// 	}
+// 	s_cCmd = 0xff;
+// }
+
 static void SensorUartSend(uint8_t *p_data, uint32_t uiSize)
 {
   Serial1.write(p_data, uiSize);
@@ -253,7 +255,7 @@ static void AutoScanSensor(void)
 			{
 				Serial.print(c_uiBaud[i]);
 				Serial.print(" baud find sensor\r\n\r\n");
-				ShowHelp();
+				// ShowHelp();
 				return ;
 			}
 			iRetry--;

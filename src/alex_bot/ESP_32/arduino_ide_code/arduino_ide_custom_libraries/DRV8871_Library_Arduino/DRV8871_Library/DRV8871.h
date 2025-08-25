@@ -28,6 +28,8 @@ private:
     uint8_t _resolution;
     uint32_t _maxDutyCycle;
     uint32_t _minDutyCycle;
+    uint8_t _minSpeedThreshold;  // <-- Add this declaration
+
 };
 
 #endif // DRV8871_H
