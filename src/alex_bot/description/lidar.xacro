@@ -33,7 +33,7 @@
 
 
 
-    <gazebo reference="laser_frame">
+    <!-- <gazebo reference="laser_frame">
         <material>Gazebo/Black</material>
 
         <sensor name="laser" type="gpu_lidar">
@@ -56,6 +56,6 @@
             <topic>scan</topic>
             <gz_frame_id>laser_frame</gz_frame_id>
         </sensor>
-    </gazebo>
+    </gazebo> -->
 
 </robot>
