@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="round_bot">
+
+    <xacro:arg name="use_ros2_control" default="false"/>
+    <xacro:arg name="sim_mode" default="false"/>
+
+    <!-- Pull in the actual robot body -->
+    <xacro:include filename="round_bot_core.xacro"/>
+
+    <!-- You could conditionally add sensors or control stuff here -->
+    <!-- <xacro:if value="$(arg use_ros2_control)">
+         <xacro:include filename="ros2_control.xacro"/>
+     </xacro:if> -->
+</robot>

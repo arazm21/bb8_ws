@@ -1,0 +1,12 @@
+build/
+install/
+log/
+src/articubot_one
+src/build
+src/install
+src/log
+src/alex_bot/secrets.txt
+src/alex_bot/build
+rosgraph.png
+rqt_graph_2_nodes_with_topic.png
+.git_corrupt/

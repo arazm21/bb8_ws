@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="round_bot">
+
+    <xacro:include filename="inertial_macros.xacro"/>
+
+    <!-- Robot properties -->
+    <xacro:property name="radius" value="0.3"/>
+    <xacro:property name="mass" value="5.0"/>
+
+    <!-- Materials -->
+    <material name="red">
+        <color rgba="1 0 0 1"/>
+    </material>
+
+    <material name="blue">
+        <color rgba="0 0 1 1"/>
+    </material>
+
+    <!-- Base link (root) -->
+    <link name="base_link">
+        <!-- Top half (red hemisphere) -->
+        <visual>
+            <origin xyz="0 0 0"/>
+            <geometry>
+                <sphere radius="${radius}"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
+
+        <!-- Bottom half (blue hemisphere) -->
+        <visual>
+            <origin xyz="0 0 0"/>
+            <geometry>
+                <sphere radius="${radius}"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+
+        <!-- Collision (whole sphere) -->
+        <collision>
+            <origin xyz="0 0 0"/>
+            <geometry>
+                <sphere radius="${radius}"/>
+            </geometry>
+        </collision>
+
+        <!-- Inertial (whole sphere) -->
+        <xacro:inertial_sphere mass="${mass}" radius="${radius}">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_sphere>
+    </link>
+
+</robot>

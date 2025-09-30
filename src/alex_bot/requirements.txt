@@ -1,0 +1,4 @@
+ros-jazzy-xacro
+ros-jazzy-joint-state-publisher
+ros-jazzy-joint-state-publisher-gui
+sudo apt install python3-smbus2
